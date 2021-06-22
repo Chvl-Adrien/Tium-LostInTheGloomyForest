@@ -19,7 +19,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 1300 },
-            debug: true}},
+            debug: false}},
     scene: [menu,Jeu,options,son,controleManette,controleClavier,controleMobile],
     input:{gamepad:true},
     fps:60,
