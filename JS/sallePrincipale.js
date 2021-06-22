@@ -23,6 +23,8 @@ export default class Jeu extends Phaser.Scene{
         this.load.image('plan4', 'assets/arbrePlan4.png');
         this.load.image('plan5', 'assets/arbrePlan5.png');
         this.load.image('fond', 'assets/fond.png');
+        this.load.image('plateforme', 'assets/plateforme.png');
+        this.load.image('water', 'assets/water.png');
 
     //Personnage
         this.load.spritesheet('tium', 'assets/spritesheet_tium.png', { frameWidth: 200, frameHeight: 200});
@@ -34,24 +36,13 @@ export default class Jeu extends Phaser.Scene{
     
 
     create(){
-
-        var player;
-        var ennemi;
-        var cursors;
-        var invulnerabilite = false;
-        var vie = 3;
-        var gameOver = false;
-        var victoire = false;
-        var combat = true;
-        
+  
         this.nbcle = 0;
         this.droite = false;
         this.recuper = 0;
-        this.djump = false;
+        this.djump = true;
         this.box = false;
-        this.jumpCount = 0;
-        this.test = true;
-        this.testB = true;
+        this.jumpCount = 2;
         this.immune = true;
         this.life = 3;
         this.HITTING = false;
@@ -80,12 +71,16 @@ export default class Jeu extends Phaser.Scene{
         let map = this.make.tilemap({ key: 'map' });
         let tileset = map.addTilesetImage('tiles', 'tiles');
 
-        map.createLayer('Back', tileset, 0, 0).setDepth(-2);
+        map.createLayer('Back', tileset, 0, 0).setDepth(-6);
         this.sol = map.createLayer('Ground', tileset, 0, 0).setDepth(-1);
-        this.plan3 = this.add.image(2500,1700,'plan3').setScrollFactor(0.8,1).setDepth(-2);
-        this.plan4 = this.add.image(2500,1700,'plan4').setScrollFactor(0.8,1).setDepth(-2);
-        this.plan5 = this.add.image(2500,1700,'plan5').setScrollFactor(0.8,1).setDepth(-2);
-        this.water = map.createLayer('Death', tileset, 0, 0).setDepth(0);
+        this.water = map.createLayer('Death', tileset, 0, 0).setDepth(-1);
+        this.plateforme = this.add.image(3840,2215,'plateforme').setDepth(0);
+        this.plan1 = this.add.image(3840,2215,'plan1').setScrollFactor(1.3,1).setDepth(1);
+        this.plan2 = this.add.image(3840,2170,'plan2').setDepth(-2);
+        this.plan3 = this.add.image(3840,2215,'plan3').setScrollFactor(1.15,1).setDepth(-3);
+        this.plan4 = this.add.image(3840,2215,'plan4').setScrollFactor(1.1,1).setDepth(-4);
+        this.plan5 = this.add.image(3840,2215,'plan5').setScrollFactor(1.05,1).setDepth(-5);
+       
        
 
     // CREATION VARIABLE TOUCHES 
@@ -145,7 +140,7 @@ export default class Jeu extends Phaser.Scene{
        
         this.anims.create({
             key: 'die',
-            frames: this.anims.generateFrameNumbers('tium', {start: 22, end: 25}),
+            frames: this.anims.generateFrameNumbers('tium', {start: 22, end: 24}),
             frameRate: 5,
         })
 
@@ -182,8 +177,6 @@ export default class Jeu extends Phaser.Scene{
         this.physics.world.setBounds(0,0, Map.widthInPixels, Map.heightInPixels);
 		this.player.setCollideWorldBounds(true);
         this.plan3 = this.add.image(2850,2000,'plan3').setScrollFactor(0.1);
-        
-        console.log(this.mob4)
 
     } // FIN CREATE  
     
@@ -273,22 +266,16 @@ export default class Jeu extends Phaser.Scene{
             }
         }
 
-        // Allow player to jump only if on ground
-        if (onGround && this.cursors.up.isDown && !this.djump){
+        // Allow player to jump only if on ground          
+        if (this.jumpCount>0 && this.cursors.up.isDown) {
             this.player.setVelocityY(-1200);
-        }
-          
-        if ((this.player.body.touching.down || this.jumpCount < 2) && (this.cursors.up.isDown) && this.test && this.djump) {
-            this.player.setVelocityY(-1200);
-            this.mob2.setVelocityY(-700);
-            this.test = false;
-            this.jumpCount++;
+            this.jumpCount--;
 
             console.log(this.jumpCount)
         }
 
-        if (this.cursors.up.isUp){
-            this.test = true ; 
+        if(this.player.body.blocked.down){
+            this.jumpCount = 2;
         }
 
         if (this.cursorSp.isDown && this.box){
@@ -309,7 +296,7 @@ export default class Jeu extends Phaser.Scene{
            // Update the animation
         if (onGround) {
             
-            this.jumpCount = 1
+            this.jumpCount = 2
             
             //Player Running if velocityX != 0 else Player Idle
         
@@ -338,37 +325,7 @@ export default class Jeu extends Phaser.Scene{
      // FIN UPDATE
     
     // AUTRES FONCTIONS 
-    deblocageSaut(player,saut){
-        saut.destroy();
-        this.djump = true;
-        if(!this.ps){
-            this.ps = this.add.image(950,200,'popupsaut').setScrollFactor(0);
-            this.time.addEvent({ delay: 3000, callback: function(){this.ps.destroy();}, callbackScope: this});
-        }
-    }
 
-    Boxing(player,boxe){
-        boxe.destroy();
-        this.box = true;
-        if(!this.pg){
-            this.pg = this.add.image(950,200,'popupgants').setScrollFactor(0);
-            this.time.addEvent({ delay: 3000, callback: function(){this.pg.destroy();}, callbackScope: this});
-        }
-    }
-
-    recoltBois(player,boisson){
-        boisson.destroy();
-        this.recuper += 1;
-        if (this.recuper == 5){
-            if(!this.pf){
-                this.pf = this.add.image(950,200,'popupfincage').setScrollFactor(0);
-                this.time.addEvent({ delay: 3000, callback: function(){this.pf.destroy();}, callbackScope: this});
-            }
-            this.untruc.destroy();
-            this.recuper = 0;
-
-        }
-    }
     hit(player,ennemy){
         if (this.HITTING){
             ennemy.destroy();

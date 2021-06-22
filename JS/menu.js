@@ -63,7 +63,7 @@ export default class menu extends Phaser.Scene {
         bouttonOptions.setInteractive();
 
         bouttonOptions.on("pointerup", () => {
-            //this.scene.start('options');
+            this.scene.start('options');
 
         })
         
